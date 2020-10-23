@@ -1,7 +1,7 @@
 package velocity
 
 type Response struct {
-	Id         int  `json:"id"`
-	CustomerId int  `json:"customer_id"`
+	Id         int  `json:"id,string"`
+	CustomerId int  `json:"customer_id,string"`
 	Accepted   bool `json:"accepted"`
 }
