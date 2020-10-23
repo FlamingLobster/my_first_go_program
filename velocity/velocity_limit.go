@@ -2,9 +2,14 @@ package velocity
 
 import (
 	"encoding/json"
+	"time"
 )
 
 var limits = getLimits()
+
+func Reset() {
+	limits = getLimits()
+}
 
 func Allowed(event string) (error, string) {
 	var loadFund LoadFund
@@ -27,8 +32,15 @@ func Allowed(event string) (error, string) {
 	}
 }
 
+const (
+	DailyFundLimit  int = 500000
+	WeeklyFundLimit int = 2000000
+)
+
 type Limits struct {
-	userTransactions map[Tuple]bool
+	userTransactions       map[Tuple]bool
+	userDailyTransactions  map[DailyTransactionKey]int
+	userWeeklyTransactions map[WeeklyTransactionKey]int
 }
 
 func (l Limits) allowed(funds LoadFund) bool {
@@ -36,10 +48,78 @@ func (l Limits) allowed(funds LoadFund) bool {
 		return false
 	}
 	l.userTransactions[KeyOf(funds.Id, funds.CustomerId)] = true
+
+	isAllowedByDailyLimit := l.allowedByDailyLimit(funds)
+	isAllowedByWeeklyLimit := l.allowedByWeeklyLimit(funds)
+
+	if isAllowedByDailyLimit && isAllowedByWeeklyLimit {
+		l.update(funds)
+		return true
+	} else {
+		return false
+	}
+}
+
+func (l Limits) allowedByDailyLimit(funds LoadFund) bool {
+	if funds.Amount.Amount > DailyFundLimit {
+		return false
+	}
+
+	startOfDay := toStartOfDay(funds.Timestamp)
+	if balance, present := l.userDailyTransactions[TimeKeyOf(funds.CustomerId, startOfDay)]; present {
+		if balance+funds.Amount.Amount > DailyFundLimit {
+			return false
+		}
+	}
 	return true
 }
 
+func (l Limits) allowedByWeeklyLimit(funds LoadFund) bool {
+	if funds.Amount.Amount > WeeklyFundLimit {
+		return false
+	}
+
+	week := WeekKeyOf(funds.CustomerId, toStartOfWeek(funds.Timestamp))
+	if balance, present := l.userWeeklyTransactions[week]; present {
+		if balance+funds.Amount.Amount > WeeklyFundLimit {
+			return false
+		}
+	}
+	return true
+}
+
+func (l Limits) update(funds LoadFund) {
+	startOfDay := toStartOfDay(funds.Timestamp)
+	if balance, present := l.userDailyTransactions[TimeKeyOf(funds.CustomerId, startOfDay)]; present {
+		l.userDailyTransactions[TimeKeyOf(funds.CustomerId, startOfDay)] = balance + funds.Amount.Amount
+	} else {
+		l.userDailyTransactions[TimeKeyOf(funds.CustomerId, startOfDay)] = funds.Amount.Amount
+	}
+
+	week := WeekKeyOf(funds.CustomerId, toStartOfWeek(funds.Timestamp))
+	if balance, present := l.userWeeklyTransactions[week]; present {
+		l.userWeeklyTransactions[week] = balance + funds.Amount.Amount
+	} else {
+		l.userWeeklyTransactions[week] = funds.Amount.Amount
+	}
+}
+
+func toStartOfDay(unrounded time.Time) time.Time {
+	utcUnrounded := unrounded.UTC()
+	return time.Date(unrounded.Year(), unrounded.Month(), unrounded.Day(), 0, 0, 0, 0, utcUnrounded.Location())
+}
+
+func toStartOfWeek(unrounded time.Time) Tuple {
+	utcUnrounded := unrounded.UTC()
+	year, week := utcUnrounded.ISOWeek()
+	return KeyOf(year, week)
+}
+
 func getLimits() *Limits {
-	limits := Limits{userTransactions: make(map[Tuple]bool)}
+	limits := Limits{
+		userTransactions:       make(map[Tuple]bool),
+		userDailyTransactions:  make(map[DailyTransactionKey]int),
+		userWeeklyTransactions: make(map[WeeklyTransactionKey]int),
+	}
 	return &limits
 }

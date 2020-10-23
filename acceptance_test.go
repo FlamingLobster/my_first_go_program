@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-func TestAcceptable(t *testing.T) {
+func TestAll(t *testing.T) {
 	allowed := make(map[velocity.Tuple]string)
 	setupResults(allowed)
 
@@ -36,6 +36,8 @@ func TestAcceptable(t *testing.T) {
 			if actualOutput != expectedOutput {
 				t.Error(
 					"Incorrect output\n",
+					"Input:    "+line,
+					"\n",
 					"Expected: "+expectedOutput,
 					"\n",
 					"Actual:   "+actualOutput,
