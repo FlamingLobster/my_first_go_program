@@ -15,10 +15,10 @@ func main() {
 
 	scanner := bufio.NewScanner(inputFile)
 	for scanner.Scan() {
-		if isSuccess, out := velocity.Allowed(scanner.Text()); isSuccess {
-			fmt.Println(out)
+		if err, output := velocity.Allowed(scanner.Text()); err != nil {
+			fmt.Println(err)
 		} else {
-			fmt.Println("nope")
+			println(output)
 		}
 	}
 }

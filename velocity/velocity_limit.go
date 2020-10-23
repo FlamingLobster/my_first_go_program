@@ -1,18 +1,28 @@
 package velocity
 
-import "encoding/json"
+import (
+	"encoding/json"
+)
 
 var limits = getLimits()
 
-func Allowed(event string) (bool, string) {
+func Allowed(event string) (error, string) {
 	var loadFund LoadFund
 	if err := json.Unmarshal([]byte(event), &loadFund); err != nil {
-		return false, ""
+		return err, ""
 	} else {
 		if limits.allowed(loadFund) {
-			return true, respond(loadFund)
+			if output, err := json.Marshal(Accepted(&loadFund)); err != nil {
+				return err, ""
+			} else {
+				return nil, string(output)
+			}
 		} else {
-			return false, ""
+			if output, err := json.Marshal(Denied(&loadFund)); err != nil {
+				return err, ""
+			} else {
+				return nil, string(output)
+			}
 		}
 	}
 }
@@ -27,10 +37,6 @@ func (l Limits) allowed(funds LoadFund) bool {
 	}
 	l.uniqueTransaction[funds.Id] = true
 	return true
-}
-
-func respond(_ LoadFund) string {
-	return "yes"
 }
 
 func getLimits() *Limits {

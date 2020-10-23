@@ -22,16 +22,21 @@ func TestAcceptable(t *testing.T) {
 			if loadFund, err := unmarhshalFunds(line); err != nil {
 				continue
 			} else {
-				actuallyAllowed, actualOutput := velocity.Allowed(line)
-				expectedOutput, expectedAllowed := allowed[loadFund.Id]
-				if !actuallyAllowed && expectedAllowed {
-					t.Error("Blocked when should have allowed")
-				}
-				if actuallyAllowed && !expectedAllowed {
-					t.Error("Allowed when should have blocked")
-				}
-				if actuallyAllowed && expectedAllowed && actualOutput != expectedOutput {
-					t.Error("Correctly allowed funds but output did not match expected output")
+				if err, actualOutput := velocity.Allowed(line); err != nil {
+					t.Error(err)
+				} else {
+					expectedOutput, present := allowed[loadFund.Id]
+					if !present {
+						t.Error("No output produced when output is expected")
+					}
+					if actualOutput != expectedOutput {
+						t.Error(
+							"Incorrect output\n",
+							"Expected: "+expectedOutput,
+							"\n",
+							"Actual:   "+actualOutput,
+						)
+					}
 				}
 			}
 		}
