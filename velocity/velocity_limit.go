@@ -2,13 +2,15 @@ package velocity
 
 import "encoding/json"
 
-func Process(event string) (bool, string) {
+var limits = getLimits()
+
+func Allowed(event string) (bool, string) {
 	var loadFund LoadFund
 	if err := json.Unmarshal([]byte(event), &loadFund); err != nil {
 		return false, ""
 	} else {
-		if Allowed(loadFund) {
-			return true, Respond(loadFund)
+		if limits.allowed(loadFund) {
+			return true, respond(loadFund)
 		} else {
 			return false, ""
 		}
@@ -16,12 +18,22 @@ func Process(event string) (bool, string) {
 }
 
 type Limits struct {
+	uniqueTransaction map[int]bool
 }
 
-func Respond(_ LoadFund) string {
-	return ""
-}
-
-func Allowed(_ LoadFund) bool {
+func (l Limits) allowed(funds LoadFund) bool {
+	if _, present := l.uniqueTransaction[funds.Id]; present {
+		return false
+	}
+	l.uniqueTransaction[funds.Id] = true
 	return true
+}
+
+func respond(_ LoadFund) string {
+	return "yes"
+}
+
+func getLimits() *Limits {
+	limits := Limits{uniqueTransaction: make(map[int]bool)}
+	return &limits
 }

@@ -15,7 +15,7 @@ func main() {
 
 	scanner := bufio.NewScanner(inputFile)
 	for scanner.Scan() {
-		if isSuccess, out := velocity.Process(scanner.Text()); isSuccess {
+		if isSuccess, out := velocity.Allowed(scanner.Text()); isSuccess {
 			fmt.Println(out)
 		} else {
 			fmt.Println("nope")
