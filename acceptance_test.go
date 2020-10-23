@@ -10,7 +10,7 @@ import (
 )
 
 func TestAcceptable(t *testing.T) {
-	allowed := make(map[int]string)
+	allowed := make(map[velocity.Tuple]string)
 	setupResults(allowed)
 
 	if inputFile, err := os.Open("input.txt"); err != nil {
@@ -19,25 +19,27 @@ func TestAcceptable(t *testing.T) {
 		scanner := bufio.NewScanner(inputFile)
 		for scanner.Scan() {
 			line := scanner.Text()
-			if loadFund, err := unmarhshalFunds(line); err != nil {
-				continue
-			} else {
-				if err, actualOutput := velocity.Allowed(line); err != nil {
-					t.Error(err)
-				} else {
-					expectedOutput, present := allowed[loadFund.Id]
-					if !present {
-						t.Error("No output produced when output is expected")
-					}
-					if actualOutput != expectedOutput {
-						t.Error(
-							"Incorrect output\n",
-							"Expected: "+expectedOutput,
-							"\n",
-							"Actual:   "+actualOutput,
-						)
-					}
-				}
+
+			loadFund, err := unmarhshalFunds(line)
+			if err != nil {
+				t.Error("Could not unmarshal input json")
+			}
+			err, actualOutput := velocity.Allowed(line)
+			if err != nil {
+				t.Error(err)
+			}
+
+			expectedOutput, present := allowed[velocity.KeyOf(loadFund.Id, loadFund.CustomerId)]
+			if !present {
+				t.Error("No output produced when output is expected")
+			}
+			if actualOutput != expectedOutput {
+				t.Error(
+					"Incorrect output\n",
+					"Expected: "+expectedOutput,
+					"\n",
+					"Actual:   "+actualOutput,
+				)
 			}
 		}
 	}
@@ -52,7 +54,7 @@ func unmarhshalFunds(line string) (*velocity.LoadFund, error) {
 	}
 }
 
-func setupResults(allowed map[int]string) {
+func setupResults(allowed map[velocity.Tuple]string) {
 	resultFile, err := os.Open("output.txt")
 	if err != nil {
 		panic(err)
@@ -64,7 +66,7 @@ func setupResults(allowed map[int]string) {
 			fmt.Println("Failed to setup expected results")
 			panic(err)
 		} else {
-			allowed[response.Id] = scanner.Text()
+			allowed[velocity.KeyOf(response.Id, response.CustomerId)] = scanner.Text()
 		}
 	}
 }

@@ -28,18 +28,18 @@ func Allowed(event string) (error, string) {
 }
 
 type Limits struct {
-	uniqueTransaction map[int]bool
+	userTransactions map[Tuple]bool
 }
 
 func (l Limits) allowed(funds LoadFund) bool {
-	if _, present := l.uniqueTransaction[funds.Id]; present {
+	if _, present := l.userTransactions[KeyOf(funds.Id, funds.CustomerId)]; present {
 		return false
 	}
-	l.uniqueTransaction[funds.Id] = true
+	l.userTransactions[KeyOf(funds.Id, funds.CustomerId)] = true
 	return true
 }
 
 func getLimits() *Limits {
-	limits := Limits{uniqueTransaction: make(map[int]bool)}
+	limits := Limits{userTransactions: make(map[Tuple]bool)}
 	return &limits
 }
