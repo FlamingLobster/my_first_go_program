@@ -10,7 +10,7 @@ import (
 )
 
 func TestAll(t *testing.T) {
-	allowed := make(map[velocity.Tuple]string)
+	allowed := make(map[string]bool)
 	setupResults(allowed)
 
 	if inputFile, err := os.Open("input.txt"); err != nil {
@@ -20,29 +20,28 @@ func TestAll(t *testing.T) {
 		for scanner.Scan() {
 			line := scanner.Text()
 
-			loadFund, err := unmarhshalFunds(line)
-			if err != nil {
-				t.Error("Could not unmarshal input json")
+			err, action, actualOutput := velocity.Allowed(line)
+			if action == velocity.Ignore {
+				continue
 			}
-			err, actualOutput := velocity.Allowed(line)
 			if err != nil {
 				t.Error(err)
 			}
 
-			expectedOutput, present := allowed[velocity.KeyOf(loadFund.Id, loadFund.CustomerId)]
+			key := actualOutput
+			_, present := allowed[key]
 			if !present {
-				t.Error("No output produced when output is expected")
-			}
-			if actualOutput != expectedOutput {
 				t.Error(
 					"Incorrect output\n",
 					"Input:    "+line,
 					"\n",
-					"Expected: "+expectedOutput,
-					"\n",
 					"Actual:   "+actualOutput,
 				)
 			}
+			delete(allowed, key)
+		}
+		if len(allowed) != 0 {
+			t.Error("Failed to match all rows in expected output")
 		}
 	}
 }
@@ -56,7 +55,7 @@ func unmarhshalFunds(line string) (*velocity.LoadFund, error) {
 	}
 }
 
-func setupResults(allowed map[velocity.Tuple]string) {
+func setupResults(allowed map[string]bool) {
 	resultFile, err := os.Open("output.txt")
 	if err != nil {
 		panic(err)
@@ -68,7 +67,7 @@ func setupResults(allowed map[velocity.Tuple]string) {
 			fmt.Println("Failed to setup expected results")
 			panic(err)
 		} else {
-			allowed[velocity.KeyOf(response.Id, response.CustomerId)] = scanner.Text()
+			allowed[scanner.Text()] = true
 		}
 	}
 }

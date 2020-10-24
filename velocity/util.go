@@ -4,13 +4,13 @@ import (
 	"time"
 )
 
-type Tuple struct {
+type UniqueTransactionKey struct {
 	id         int
 	customerId int
 }
 
-func KeyOf(id int, customerId int) Tuple {
-	return Tuple{
+func KeyOf(id int, customerId int) UniqueTransactionKey {
+	return UniqueTransactionKey{
 		id:         id,
 		customerId: customerId,
 	}
@@ -30,10 +30,10 @@ func TimeKeyOf(customerId int, datetime time.Time) DailyTransactionKey {
 
 type WeeklyTransactionKey struct {
 	customerId int
-	week       Tuple
+	week       UniqueTransactionKey
 }
 
-func WeekKeyOf(customerid int, tuple Tuple) WeeklyTransactionKey {
+func WeekKeyOf(customerid int, tuple UniqueTransactionKey) WeeklyTransactionKey {
 	return WeeklyTransactionKey{
 		customerId: customerid,
 		week:       tuple,
@@ -45,7 +45,7 @@ func ToStartOfDay(unrounded time.Time) time.Time {
 	return time.Date(unrounded.Year(), unrounded.Month(), unrounded.Day(), 0, 0, 0, 0, utcUnrounded.Location())
 }
 
-func ToStartOfWeek(unrounded time.Time) Tuple {
+func ToStartOfWeek(unrounded time.Time) UniqueTransactionKey {
 	utcUnrounded := unrounded.UTC()
 	year, week := utcUnrounded.ISOWeek()
 	return KeyOf(year, week)

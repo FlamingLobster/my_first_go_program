@@ -8,17 +8,35 @@ import (
 )
 
 func main() {
+	outputFile, err := os.Create("produced.txt")
+	if err != nil {
+		panic(err)
+	}
+	defer outputFile.Close()
+
 	inputFile, err := os.Open("input.txt")
 	if err != nil {
 		panic(err)
 	}
+	defer inputFile.Close()
 
 	scanner := bufio.NewScanner(inputFile)
 	for scanner.Scan() {
-		if err, output := velocity.Allowed(scanner.Text()); err != nil {
+		err, action, output := velocity.Allowed(scanner.Text())
+		if err != nil {
 			fmt.Println(err)
-		} else {
-			println(output)
+			continue
 		}
+		if action == velocity.Ignore {
+			continue
+		}
+		write(outputFile, output)
+	}
+}
+
+func write(file *os.File, s string) {
+	_, err := file.WriteString(s + "\n")
+	if err != nil {
+		fmt.Println(err)
 	}
 }
