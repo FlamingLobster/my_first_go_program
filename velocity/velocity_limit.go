@@ -2,7 +2,6 @@ package velocity
 
 import (
 	"encoding/json"
-	"time"
 )
 
 var limits = getLimits()
@@ -65,7 +64,7 @@ func (l Limits) allowedByDailyLimit(funds LoadFund) bool {
 		return false
 	}
 
-	startOfDay := toStartOfDay(funds.Timestamp)
+	startOfDay := ToStartOfDay(funds.Timestamp)
 	if balance, present := l.userDailyTransactions[TimeKeyOf(funds.CustomerId, startOfDay)]; present {
 		if balance+funds.Amount.Amount > DailyFundLimit {
 			return false
@@ -79,7 +78,7 @@ func (l Limits) allowedByWeeklyLimit(funds LoadFund) bool {
 		return false
 	}
 
-	week := WeekKeyOf(funds.CustomerId, toStartOfWeek(funds.Timestamp))
+	week := WeekKeyOf(funds.CustomerId, ToStartOfWeek(funds.Timestamp))
 	if balance, present := l.userWeeklyTransactions[week]; present {
 		if balance+funds.Amount.Amount > WeeklyFundLimit {
 			return false
@@ -89,30 +88,19 @@ func (l Limits) allowedByWeeklyLimit(funds LoadFund) bool {
 }
 
 func (l Limits) update(funds LoadFund) {
-	startOfDay := toStartOfDay(funds.Timestamp)
+	startOfDay := ToStartOfDay(funds.Timestamp)
 	if balance, present := l.userDailyTransactions[TimeKeyOf(funds.CustomerId, startOfDay)]; present {
 		l.userDailyTransactions[TimeKeyOf(funds.CustomerId, startOfDay)] = balance + funds.Amount.Amount
 	} else {
 		l.userDailyTransactions[TimeKeyOf(funds.CustomerId, startOfDay)] = funds.Amount.Amount
 	}
 
-	week := WeekKeyOf(funds.CustomerId, toStartOfWeek(funds.Timestamp))
+	week := WeekKeyOf(funds.CustomerId, ToStartOfWeek(funds.Timestamp))
 	if balance, present := l.userWeeklyTransactions[week]; present {
 		l.userWeeklyTransactions[week] = balance + funds.Amount.Amount
 	} else {
 		l.userWeeklyTransactions[week] = funds.Amount.Amount
 	}
-}
-
-func toStartOfDay(unrounded time.Time) time.Time {
-	utcUnrounded := unrounded.UTC()
-	return time.Date(unrounded.Year(), unrounded.Month(), unrounded.Day(), 0, 0, 0, 0, utcUnrounded.Location())
-}
-
-func toStartOfWeek(unrounded time.Time) Tuple {
-	utcUnrounded := unrounded.UTC()
-	year, week := utcUnrounded.ISOWeek()
-	return KeyOf(year, week)
 }
 
 func getLimits() *Limits {

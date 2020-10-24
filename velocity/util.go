@@ -17,13 +17,13 @@ func KeyOf(id int, customerId int) Tuple {
 }
 
 type DailyTransactionKey struct {
-	customerId int
+	CustomerId int
 	datetime   time.Time
 }
 
 func TimeKeyOf(customerId int, datetime time.Time) DailyTransactionKey {
 	return DailyTransactionKey{
-		customerId: customerId,
+		CustomerId: customerId,
 		datetime:   datetime,
 	}
 }
@@ -38,4 +38,15 @@ func WeekKeyOf(customerid int, tuple Tuple) WeeklyTransactionKey {
 		customerId: customerid,
 		week:       tuple,
 	}
+}
+
+func ToStartOfDay(unrounded time.Time) time.Time {
+	utcUnrounded := unrounded.UTC()
+	return time.Date(unrounded.Year(), unrounded.Month(), unrounded.Day(), 0, 0, 0, 0, utcUnrounded.Location())
+}
+
+func ToStartOfWeek(unrounded time.Time) Tuple {
+	utcUnrounded := unrounded.UTC()
+	year, week := utcUnrounded.ISOWeek()
+	return KeyOf(year, week)
 }
