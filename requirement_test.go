@@ -63,7 +63,7 @@ func TestProvidedInputFile(t *testing.T) {
 				continue
 			}
 			startOfDay := velocity.ToStartOfDay(loadFund.Timestamp)
-			key := velocity.TimeKeyOf(loadFund.CustomerId, startOfDay)
+			key := velocity.DailyKey(loadFund.CustomerId, startOfDay)
 			if transactions, present := userTransactions[key]; present {
 				transactions = append(transactions, line)
 				userTransactions[key] = transactions

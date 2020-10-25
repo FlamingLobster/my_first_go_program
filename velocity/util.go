@@ -9,7 +9,7 @@ type UniqueTransactionKey struct {
 	customerId int
 }
 
-func KeyOf(id int, customerId int) UniqueTransactionKey {
+func TransactionKey(id int, customerId int) UniqueTransactionKey {
 	return UniqueTransactionKey{
 		id:         id,
 		customerId: customerId,
@@ -21,7 +21,7 @@ type DailyTransactionKey struct {
 	datetime   time.Time
 }
 
-func TimeKeyOf(customerId int, datetime time.Time) DailyTransactionKey {
+func DailyKey(customerId int, datetime time.Time) DailyTransactionKey {
 	return DailyTransactionKey{
 		CustomerId: customerId,
 		datetime:   datetime,
@@ -33,7 +33,7 @@ type WeeklyTransactionKey struct {
 	week       UniqueTransactionKey
 }
 
-func WeekKeyOf(customerId int, tuple UniqueTransactionKey) WeeklyTransactionKey {
+func WeeklyKey(customerId int, tuple UniqueTransactionKey) WeeklyTransactionKey {
 	return WeeklyTransactionKey{
 		customerId: customerId,
 		week:       tuple,
@@ -57,5 +57,5 @@ func ToStartOfDay(unrounded time.Time) time.Time {
 func ToStartOfWeek(unrounded time.Time) UniqueTransactionKey {
 	utcUnrounded := unrounded.UTC()
 	year, week := utcUnrounded.ISOWeek()
-	return KeyOf(year, week)
+	return TransactionKey(year, week)
 }

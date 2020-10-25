@@ -28,10 +28,10 @@ func (b *BalanceAndCount) increment() {
 }
 
 func (l Limits) Allowed(funds Funds) int {
-	if _, present := l.userTransactions[KeyOf(funds.Id, funds.CustomerId)]; present {
+	if _, present := l.userTransactions[TransactionKey(funds.Id, funds.CustomerId)]; present {
 		return Ignore
 	}
-	l.userTransactions[KeyOf(funds.Id, funds.CustomerId)] = true
+	l.userTransactions[TransactionKey(funds.Id, funds.CustomerId)] = true
 
 	isAllowedByDailyLimit := l.allowedByDailyLimit(funds)
 	isAllowedByWeeklyLimit := l.allowedByWeeklyLimit(funds)
@@ -50,7 +50,7 @@ func (l Limits) allowedByDailyLimit(funds Funds) bool {
 	}
 
 	startOfDay := ToStartOfDay(funds.Timestamp)
-	if balance, present := l.userDailyTransactions[TimeKeyOf(funds.CustomerId, startOfDay)]; present {
+	if balance, present := l.userDailyTransactions[DailyKey(funds.CustomerId, startOfDay)]; present {
 		if balance.balance+funds.Dollar.Amount > DailyFundLimit || balance.count == DailyDistinctLimit {
 			return false
 		}
@@ -63,7 +63,7 @@ func (l Limits) allowedByWeeklyLimit(funds Funds) bool {
 		return false
 	}
 
-	week := WeekKeyOf(funds.CustomerId, ToStartOfWeek(funds.Timestamp))
+	week := WeeklyKey(funds.CustomerId, ToStartOfWeek(funds.Timestamp))
 	if balance, present := l.userWeeklyTransactions[week]; present {
 		if balance+funds.Dollar.Amount > WeeklyFundLimit {
 			return false
@@ -74,13 +74,13 @@ func (l Limits) allowedByWeeklyLimit(funds Funds) bool {
 
 func (l Limits) update(funds Funds) {
 	startOfDay := ToStartOfDay(funds.Timestamp)
-	if balance, present := l.userDailyTransactions[TimeKeyOf(funds.CustomerId, startOfDay)]; present {
-		l.userDailyTransactions[TimeKeyOf(funds.CustomerId, startOfDay)] = balance.addBalance(funds.Dollar.Amount)
+	if balance, present := l.userDailyTransactions[DailyKey(funds.CustomerId, startOfDay)]; present {
+		l.userDailyTransactions[DailyKey(funds.CustomerId, startOfDay)] = balance.addBalance(funds.Dollar.Amount)
 	} else {
-		l.userDailyTransactions[TimeKeyOf(funds.CustomerId, startOfDay)] = &BalanceAndCount{funds.Dollar.Amount, 1}
+		l.userDailyTransactions[DailyKey(funds.CustomerId, startOfDay)] = &BalanceAndCount{funds.Dollar.Amount, 1}
 	}
 
-	week := WeekKeyOf(funds.CustomerId, ToStartOfWeek(funds.Timestamp))
+	week := WeeklyKey(funds.CustomerId, ToStartOfWeek(funds.Timestamp))
 	if balance, present := l.userWeeklyTransactions[week]; present {
 		l.userWeeklyTransactions[week] = balance + funds.Dollar.Amount
 	} else {
