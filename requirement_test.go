@@ -20,7 +20,7 @@ On this commit, there is no logic checking for the 3 load per day limit. But the
 and everything will pass.
 
 I've not modified the provided input.txt nor made a new file. Such a file should be easy to construct. And a
-test in limit_test covers this scenario
+test in limit_test covers this scenario to ensure that this application produces the correct output
 
 In sequence:
 Customer ID: 732

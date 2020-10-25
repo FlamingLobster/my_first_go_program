@@ -7,6 +7,9 @@ import (
 	"time"
 )
 
+/**
+This came before I understood the typical go style table tests. This can be turned into table tests
+*/
 func TestRepeatedId(t *testing.T) {
 	Reset()
 

@@ -5,6 +5,9 @@ import (
 	"time"
 )
 
+/**
+not a complete test suite, most tests have been omitted for brevity for this exercise
+*/
 func TestLimits_Allowed(t *testing.T) {
 	type fields struct {
 		userTransactions       map[UniqueTransactionKey]bool
@@ -51,6 +54,16 @@ func TestLimits_Allowed(t *testing.T) {
 			},
 			want: []int{Accept, Accept, Accept, Reject},
 		},
+		//{name: "testSingleFundGreaterThanDailyLimit"},
+		//{name: "testMultipleFundAddUpToGreaterThanDailyLimit"},
+		//{name: "testSingleFundGreaterThanWeeklyLimit"},
+		//{name: "testMultipleFundAddUpToGreaterThanWeeklyLimit"},
+		//{name: "testIgnoreDuplicatedIdAndCustomerId"},
+		//{name: "testDayEndsAtUtcMidnight"},
+		//{name: "testDayEarlyBoundaryIsAtUtcMidnightExclusive"},
+		//{name: "testDayLaterBoundaryIsAtUtcMidnightInclusive"},
+		//{name: "testWeekStartsOnMondayMorningUtcZeroInclusive"},
+		//{name: "testWeekEndsOnSundayUtcMidnightMinusOneSecond"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
