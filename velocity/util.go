@@ -40,6 +40,7 @@ func WeeklyKey(customerId int, tuple UniqueTransactionKey) WeeklyTransactionKey 
 	}
 }
 
+//not sure if the GOROOT provides this out of the box, I didn't dig for it
 func ToStartOfDay(unrounded time.Time) time.Time {
 	utcUnrounded := unrounded.UTC()
 	return time.Date(
@@ -54,6 +55,7 @@ func ToStartOfDay(unrounded time.Time) time.Time {
 	)
 }
 
+//not sure if the GOROOT provides this out of the box, I didn't dig for it
 func ToStartOfWeek(unrounded time.Time) UniqueTransactionKey {
 	utcUnrounded := unrounded.UTC()
 	year, week := utcUnrounded.ISOWeek()

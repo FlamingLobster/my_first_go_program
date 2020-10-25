@@ -27,7 +27,7 @@ func (b *BalanceAndCount) increment() {
 	b.count = b.count + 1
 }
 
-func (l Limits) Allowed(funds Funds) int {
+func (l *Limits) Allowed(funds Funds) int {
 	if _, present := l.userTransactions[TransactionKey(funds.Id, funds.CustomerId)]; present {
 		return Ignore
 	}
@@ -44,21 +44,24 @@ func (l Limits) Allowed(funds Funds) int {
 	}
 }
 
-func (l Limits) allowedByDailyLimit(funds Funds) bool {
+func (l *Limits) allowedByDailyLimit(funds Funds) bool {
 	if funds.Dollar.Amount > DailyFundLimit {
 		return false
 	}
 
 	startOfDay := ToStartOfDay(funds.Timestamp)
-	if balance, present := l.userDailyTransactions[DailyKey(funds.CustomerId, startOfDay)]; present {
-		if balance.balance+funds.Dollar.Amount > DailyFundLimit || balance.count == DailyDistinctLimit {
+	if balanceAndCount, present := l.userDailyTransactions[DailyKey(funds.CustomerId, startOfDay)]; present {
+		//This assumes that only an accepted load fund event is counted among the 3 allowed per day. Failed ones do not
+		//increase the count. This is ambiguous in the requirements but the output matches the expected output.txt file
+		if balanceAndCount.balance+funds.Dollar.Amount > DailyFundLimit ||
+			balanceAndCount.count == DailyDistinctLimit {
 			return false
 		}
 	}
 	return true
 }
 
-func (l Limits) allowedByWeeklyLimit(funds Funds) bool {
+func (l *Limits) allowedByWeeklyLimit(funds Funds) bool {
 	if funds.Dollar.Amount > WeeklyFundLimit {
 		return false
 	}
@@ -72,7 +75,7 @@ func (l Limits) allowedByWeeklyLimit(funds Funds) bool {
 	return true
 }
 
-func (l Limits) update(funds Funds) {
+func (l *Limits) update(funds Funds) {
 	startOfDay := ToStartOfDay(funds.Timestamp)
 	if balance, present := l.userDailyTransactions[DailyKey(funds.CustomerId, startOfDay)]; present {
 		l.userDailyTransactions[DailyKey(funds.CustomerId, startOfDay)] = balance.addBalance(funds.Dollar.Amount)
