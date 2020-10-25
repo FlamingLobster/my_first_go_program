@@ -6,7 +6,7 @@ type Response struct {
 	Accepted   bool `json:"accepted"`
 }
 
-func Accepted(loadFund *LoadFund) *Response {
+func Accepted(loadFund *Funds) *Response {
 	r := Response{
 		Id:         loadFund.Id,
 		CustomerId: loadFund.CustomerId,
@@ -15,7 +15,7 @@ func Accepted(loadFund *LoadFund) *Response {
 	return &r
 }
 
-func Denied(loadFund *LoadFund) *Response {
+func Denied(loadFund *Funds) *Response {
 	r := Response{
 		Id:         loadFund.Id,
 		CustomerId: loadFund.CustomerId,

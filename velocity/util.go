@@ -33,16 +33,25 @@ type WeeklyTransactionKey struct {
 	week       UniqueTransactionKey
 }
 
-func WeekKeyOf(customerid int, tuple UniqueTransactionKey) WeeklyTransactionKey {
+func WeekKeyOf(customerId int, tuple UniqueTransactionKey) WeeklyTransactionKey {
 	return WeeklyTransactionKey{
-		customerId: customerid,
+		customerId: customerId,
 		week:       tuple,
 	}
 }
 
 func ToStartOfDay(unrounded time.Time) time.Time {
 	utcUnrounded := unrounded.UTC()
-	return time.Date(unrounded.Year(), unrounded.Month(), unrounded.Day(), 0, 0, 0, 0, utcUnrounded.Location())
+	return time.Date(
+		unrounded.Year(),
+		unrounded.Month(),
+		unrounded.Day(),
+		0,
+		0,
+		0,
+		0,
+		utcUnrounded.Location(),
+	)
 }
 
 func ToStartOfWeek(unrounded time.Time) UniqueTransactionKey {

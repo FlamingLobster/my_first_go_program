@@ -20,7 +20,7 @@ func TestAll(t *testing.T) {
 		for scanner.Scan() {
 			line := scanner.Text()
 
-			err, action, actualOutput := velocity.Allowed(line)
+			err, action, actualOutput := Allowed(line)
 			if action == velocity.Ignore {
 				continue
 			}
@@ -46,8 +46,8 @@ func TestAll(t *testing.T) {
 	}
 }
 
-func unmarhshalFunds(line string) (*velocity.LoadFund, error) {
-	var loadFund velocity.LoadFund
+func unmarhshalFunds(line string) (*velocity.Funds, error) {
+	var loadFund velocity.Funds
 	if err := json.Unmarshal([]byte(line), &loadFund); err != nil {
 		return nil, err
 	} else {

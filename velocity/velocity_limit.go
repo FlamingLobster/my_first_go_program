@@ -1,42 +1,5 @@
 package velocity
 
-import (
-	"encoding/json"
-	"errors"
-)
-
-var limits = GetLimits()
-
-func Reset() {
-	limits = GetLimits()
-}
-
-func Allowed(event string) (error, int, string) {
-	var loadFund LoadFund
-	if err := json.Unmarshal([]byte(event), &loadFund); err != nil {
-		return err, Ignore, ""
-	} else {
-		action := limits.allowed(loadFund)
-		switch action {
-		case Accept:
-			if output, err := json.Marshal(Accepted(&loadFund)); err != nil {
-				return err, Ignore, ""
-			} else {
-				return nil, Accept, string(output)
-			}
-		case Deny:
-			if output, err := json.Marshal(Denied(&loadFund)); err != nil {
-				return err, Ignore, ""
-			} else {
-				return nil, Deny, string(output)
-			}
-		case Ignore:
-			return nil, Ignore, ""
-		}
-	}
-	return errors.New("should not get here"), Ignore, ""
-}
-
 const (
 	DailyDistinctLimit int = 3
 	DailyFundLimit     int = 500000
@@ -64,7 +27,7 @@ func (b *BalanceAndCount) increment() {
 	b.count = b.count + 1
 }
 
-func (l Limits) allowed(funds LoadFund) int {
+func (l Limits) Allowed(funds Funds) int {
 	if _, present := l.userTransactions[KeyOf(funds.Id, funds.CustomerId)]; present {
 		return Ignore
 	}
@@ -77,55 +40,55 @@ func (l Limits) allowed(funds LoadFund) int {
 		l.update(funds)
 		return Accept
 	} else {
-		return Deny
+		return Reject
 	}
 }
 
-func (l Limits) allowedByDailyLimit(funds LoadFund) bool {
-	if funds.Amount.Amount > DailyFundLimit {
+func (l Limits) allowedByDailyLimit(funds Funds) bool {
+	if funds.Dollar.Amount > DailyFundLimit {
 		return false
 	}
 
 	startOfDay := ToStartOfDay(funds.Timestamp)
 	if balance, present := l.userDailyTransactions[TimeKeyOf(funds.CustomerId, startOfDay)]; present {
-		if balance.balance+funds.Amount.Amount > DailyFundLimit || balance.count == DailyDistinctLimit {
+		if balance.balance+funds.Dollar.Amount > DailyFundLimit || balance.count == DailyDistinctLimit {
 			return false
 		}
 	}
 	return true
 }
 
-func (l Limits) allowedByWeeklyLimit(funds LoadFund) bool {
-	if funds.Amount.Amount > WeeklyFundLimit {
+func (l Limits) allowedByWeeklyLimit(funds Funds) bool {
+	if funds.Dollar.Amount > WeeklyFundLimit {
 		return false
 	}
 
 	week := WeekKeyOf(funds.CustomerId, ToStartOfWeek(funds.Timestamp))
 	if balance, present := l.userWeeklyTransactions[week]; present {
-		if balance+funds.Amount.Amount > WeeklyFundLimit {
+		if balance+funds.Dollar.Amount > WeeklyFundLimit {
 			return false
 		}
 	}
 	return true
 }
 
-func (l Limits) update(funds LoadFund) {
+func (l Limits) update(funds Funds) {
 	startOfDay := ToStartOfDay(funds.Timestamp)
 	if balance, present := l.userDailyTransactions[TimeKeyOf(funds.CustomerId, startOfDay)]; present {
-		l.userDailyTransactions[TimeKeyOf(funds.CustomerId, startOfDay)] = balance.addBalance(funds.Amount.Amount)
+		l.userDailyTransactions[TimeKeyOf(funds.CustomerId, startOfDay)] = balance.addBalance(funds.Dollar.Amount)
 	} else {
-		l.userDailyTransactions[TimeKeyOf(funds.CustomerId, startOfDay)] = &BalanceAndCount{funds.Amount.Amount, 1}
+		l.userDailyTransactions[TimeKeyOf(funds.CustomerId, startOfDay)] = &BalanceAndCount{funds.Dollar.Amount, 1}
 	}
 
 	week := WeekKeyOf(funds.CustomerId, ToStartOfWeek(funds.Timestamp))
 	if balance, present := l.userWeeklyTransactions[week]; present {
-		l.userWeeklyTransactions[week] = balance + funds.Amount.Amount
+		l.userWeeklyTransactions[week] = balance + funds.Dollar.Amount
 	} else {
-		l.userWeeklyTransactions[week] = funds.Amount.Amount
+		l.userWeeklyTransactions[week] = funds.Dollar.Amount
 	}
 }
 
-func GetLimits() *Limits {
+func NewLimit() *Limits {
 	limits := Limits{
 		userTransactions:       make(map[UniqueTransactionKey]bool),
 		userDailyTransactions:  make(map[DailyTransactionKey]*BalanceAndCount),
@@ -133,9 +96,3 @@ func GetLimits() *Limits {
 	}
 	return &limits
 }
-
-const (
-	Accept = iota
-	Deny
-	Ignore
-)

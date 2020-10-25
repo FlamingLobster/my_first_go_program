@@ -7,10 +7,10 @@ import (
 	"time"
 )
 
-type LoadFund struct {
+type Funds struct {
 	Id         int       `json:"id,string"`
 	CustomerId int       `json:"customer_id,string"`
-	Amount     Dollar    `json:"load_amount"`
+	Dollar     Dollar    `json:"load_amount"`
 	Timestamp  time.Time `json:"time"`
 }
 

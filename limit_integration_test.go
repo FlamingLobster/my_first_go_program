@@ -8,12 +8,12 @@ import (
 )
 
 func TestRepeatedId(t *testing.T) {
-	velocity.Reset()
+	Reset()
 
-	loadFund := velocity.LoadFund{
+	loadFund := velocity.Funds{
 		Id:         33,
 		CustomerId: 44,
-		Amount: velocity.Dollar{
+		Dollar: velocity.Dollar{
 			Amount: 2352,
 		},
 	}
@@ -22,8 +22,8 @@ func TestRepeatedId(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	_, _, _ = velocity.Allowed(string(input))
-	err, action, _ := velocity.Allowed(string(input))
+	_, _, _ = Allowed(string(input))
+	err, action, _ := Allowed(string(input))
 	if err != nil {
 		t.Error(err)
 	}
@@ -34,19 +34,19 @@ func TestRepeatedId(t *testing.T) {
 }
 
 func TestSameTransactionIdDifferentCustomerId(t *testing.T) {
-	velocity.Reset()
+	Reset()
 
-	loadFund1 := velocity.LoadFund{
+	loadFund1 := velocity.Funds{
 		Id:         33,
 		CustomerId: 44,
-		Amount: velocity.Dollar{
+		Dollar: velocity.Dollar{
 			Amount: 2352,
 		},
 	}
-	loadFund2 := velocity.LoadFund{
+	loadFund2 := velocity.Funds{
 		Id:         loadFund1.Id,
 		CustomerId: loadFund1.CustomerId + 1,
-		Amount: velocity.Dollar{
+		Dollar: velocity.Dollar{
 			Amount: 2352,
 		},
 	}
@@ -64,8 +64,8 @@ func TestSameTransactionIdDifferentCustomerId(t *testing.T) {
 		t.Error(err)
 	}
 
-	_, _, _ = velocity.Allowed(string(input1))
-	err, _, output := velocity.Allowed(string(input2))
+	_, _, _ = Allowed(string(input1))
+	err, _, output := Allowed(string(input2))
 	if err != nil {
 		t.Error(err)
 	}
@@ -79,12 +79,12 @@ func TestSameTransactionIdDifferentCustomerId(t *testing.T) {
 }
 
 func TestRejectSingleTransactionGreaterThanDailyLimit(t *testing.T) {
-	velocity.Reset()
+	Reset()
 
-	loadFund := velocity.LoadFund{
+	loadFund := velocity.Funds{
 		Id:         33,
 		CustomerId: 44,
-		Amount: velocity.Dollar{
+		Dollar: velocity.Dollar{
 			Amount: velocity.DailyFundLimit + 1,
 		},
 	}
@@ -99,7 +99,7 @@ func TestRejectSingleTransactionGreaterThanDailyLimit(t *testing.T) {
 		t.Error(err)
 	}
 
-	err, _, output := velocity.Allowed(string(input))
+	err, _, output := Allowed(string(input))
 	if err != nil {
 		t.Error(err)
 	}
@@ -113,12 +113,12 @@ func TestRejectSingleTransactionGreaterThanDailyLimit(t *testing.T) {
 }
 
 func TestRejectMultipleTransactionAddUpToGreaterThanDailyLimit(t *testing.T) {
-	velocity.Reset()
+	Reset()
 
-	loadFund1 := velocity.LoadFund{
+	loadFund1 := velocity.Funds{
 		Id:         33,
 		CustomerId: 44,
-		Amount: velocity.Dollar{
+		Dollar: velocity.Dollar{
 			Amount: velocity.DailyFundLimit / 2,
 		},
 		Timestamp: time.Date(
@@ -131,10 +131,10 @@ func TestRejectMultipleTransactionAddUpToGreaterThanDailyLimit(t *testing.T) {
 			0,
 			time.FixedZone("UTC", 0)),
 	}
-	loadFund2 := velocity.LoadFund{
+	loadFund2 := velocity.Funds{
 		Id:         34,
 		CustomerId: 44,
-		Amount: velocity.Dollar{
+		Dollar: velocity.Dollar{
 			Amount: velocity.DailyFundLimit / 2,
 		},
 		Timestamp: time.Date(
@@ -152,10 +152,10 @@ func TestRejectMultipleTransactionAddUpToGreaterThanDailyLimit(t *testing.T) {
 		CustomerId: loadFund2.CustomerId,
 		Accepted:   true,
 	}
-	loadFund3 := velocity.LoadFund{
+	loadFund3 := velocity.Funds{
 		Id:         35,
 		CustomerId: 44,
-		Amount: velocity.Dollar{
+		Dollar: velocity.Dollar{
 			Amount: velocity.DailyFundLimit / 2,
 		},
 		Timestamp: time.Date(
@@ -178,7 +178,7 @@ func TestRejectMultipleTransactionAddUpToGreaterThanDailyLimit(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	err, _, _ = velocity.Allowed(string(input1))
+	err, _, _ = Allowed(string(input1))
 	if err != nil {
 		t.Error(err)
 	}
@@ -187,7 +187,7 @@ func TestRejectMultipleTransactionAddUpToGreaterThanDailyLimit(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	err, _, output2 := velocity.Allowed(string(input2))
+	err, _, output2 := Allowed(string(input2))
 	if err != nil {
 		t.Error(err)
 	}
@@ -203,7 +203,7 @@ func TestRejectMultipleTransactionAddUpToGreaterThanDailyLimit(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	err, _, output3 := velocity.Allowed(string(input3))
+	err, _, output3 := Allowed(string(input3))
 	if err != nil {
 		t.Error(err)
 	}
@@ -217,12 +217,12 @@ func TestRejectMultipleTransactionAddUpToGreaterThanDailyLimit(t *testing.T) {
 }
 
 func TestReject4thLoadOfTheDay(t *testing.T) {
-	velocity.Reset()
+	Reset()
 
-	loadFund1 := velocity.LoadFund{
+	loadFund1 := velocity.Funds{
 		Id:         33,
 		CustomerId: 44,
-		Amount: velocity.Dollar{
+		Dollar: velocity.Dollar{
 			Amount: velocity.DailyFundLimit / 10,
 		},
 		Timestamp: time.Date(
@@ -235,10 +235,10 @@ func TestReject4thLoadOfTheDay(t *testing.T) {
 			0,
 			time.FixedZone("UTC", 0)),
 	}
-	loadFund2 := velocity.LoadFund{
+	loadFund2 := velocity.Funds{
 		Id:         34,
 		CustomerId: 44,
-		Amount: velocity.Dollar{
+		Dollar: velocity.Dollar{
 			Amount: velocity.DailyFundLimit / 10,
 		},
 		Timestamp: time.Date(
@@ -251,10 +251,10 @@ func TestReject4thLoadOfTheDay(t *testing.T) {
 			0,
 			time.FixedZone("UTC", 0)),
 	}
-	loadFund3 := velocity.LoadFund{
+	loadFund3 := velocity.Funds{
 		Id:         35,
 		CustomerId: 44,
-		Amount: velocity.Dollar{
+		Dollar: velocity.Dollar{
 			Amount: velocity.DailyFundLimit / 10,
 		},
 		Timestamp: time.Date(
@@ -272,10 +272,10 @@ func TestReject4thLoadOfTheDay(t *testing.T) {
 		CustomerId: loadFund3.CustomerId,
 		Accepted:   true,
 	}
-	loadFund4 := velocity.LoadFund{
+	loadFund4 := velocity.Funds{
 		Id:         36,
 		CustomerId: 44,
-		Amount: velocity.Dollar{
+		Dollar: velocity.Dollar{
 			Amount: velocity.DailyFundLimit / 10,
 		},
 		Timestamp: time.Date(
@@ -298,7 +298,7 @@ func TestReject4thLoadOfTheDay(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	err, _, _ = velocity.Allowed(string(input1))
+	err, _, _ = Allowed(string(input1))
 	if err != nil {
 		t.Error(err)
 	}
@@ -307,7 +307,7 @@ func TestReject4thLoadOfTheDay(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	err, _, _ = velocity.Allowed(string(input2))
+	err, _, _ = Allowed(string(input2))
 	if err != nil {
 		t.Error(err)
 	}
@@ -316,7 +316,7 @@ func TestReject4thLoadOfTheDay(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	err, _, output3 := velocity.Allowed(string(input3))
+	err, _, output3 := Allowed(string(input3))
 	if err != nil {
 		t.Error(err)
 	}
@@ -332,7 +332,7 @@ func TestReject4thLoadOfTheDay(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	err, _, output4 := velocity.Allowed(string(input4))
+	err, _, output4 := Allowed(string(input4))
 	if err != nil {
 		t.Error(err)
 	}
