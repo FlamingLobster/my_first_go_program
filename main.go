@@ -5,14 +5,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"koho/velocity"
+	. "koho/velocity"
 	"os"
 )
 
-var limits = velocity.NewLimit()
+var limits = NewLimit()
 
 func Reset() {
-	limits = velocity.NewLimit()
+	limits = NewLimit()
 }
 
 func main() {
@@ -35,37 +35,41 @@ func main() {
 			fmt.Println(err)
 			continue
 		}
-		if action == velocity.Ignore {
+		if action == Ignore {
 			continue
 		}
 		write(outputFile, output)
 	}
 }
 
+/**
+Error is on the left because I'm more used to it. It seems that Go prefers the error on the right. Will have to refactor
+this.
+*/
 func Allowed(event string) (error, int, string) {
-	var loadFund velocity.Funds
+	var loadFund Funds
 	if err := json.Unmarshal([]byte(event), &loadFund); err != nil {
-		return err, velocity.Ignore, ""
+		return err, Ignore, ""
 	} else {
 		action := limits.Allowed(loadFund)
 		switch action {
-		case velocity.Accept:
-			if output, err := json.Marshal(velocity.Accepted(&loadFund)); err != nil {
-				return err, velocity.Ignore, ""
+		case Accept:
+			if output, err := json.Marshal(Accepted(&loadFund)); err != nil {
+				return err, Ignore, ""
 			} else {
-				return nil, velocity.Accept, string(output)
+				return nil, Accept, string(output)
 			}
-		case velocity.Reject:
-			if output, err := json.Marshal(velocity.Denied(&loadFund)); err != nil {
-				return err, velocity.Ignore, ""
+		case Reject:
+			if output, err := json.Marshal(Denied(&loadFund)); err != nil {
+				return err, Ignore, ""
 			} else {
-				return nil, velocity.Reject, string(output)
+				return nil, Reject, string(output)
 			}
-		case velocity.Ignore:
-			return nil, velocity.Ignore, ""
+		case Ignore:
+			return nil, Ignore, ""
 		}
 	}
-	return errors.New("should not get here"), velocity.Ignore, ""
+	return errors.New("should not get here"), Ignore, ""
 }
 
 func write(file *os.File, s string) {

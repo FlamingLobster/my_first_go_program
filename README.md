@@ -6,4 +6,4 @@ A main is provided. Simply run with the standard go build command to exercise th
 
 The test suite implementation is incomplete. Most tests are only stubs. 
 
-I've noticed a deficiency in the provided input.txt file. I've written down my investigation in the requirement_test.go
+###### I've noticed a deficiency in the provided input.txt file. I've written down my investigation in the requirement_test.go

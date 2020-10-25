@@ -9,6 +9,13 @@ import (
 	"testing"
 )
 
+/**
+This test evolved from the beginning when I didn't fully understand all the requirements. As such, it's much too complicated.
+This test should be simplified to simply traverse the two files in sequence to match the input to output. Although there is
+a small complication with duplicated id and customer id not giving any output.
+
+There's probably some way to construct a parameterized test with file sources but I've not looked into this.
+*/
 func TestAll(t *testing.T) {
 	allowed := make(map[string]bool)
 	setupResults(allowed)
