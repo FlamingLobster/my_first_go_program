@@ -5,9 +5,6 @@ import (
 	"time"
 )
 
-/**
-not a complete test suite, most tests have been omitted for brevity for this exercise
-*/
 func TestLimits_Allowed(t *testing.T) {
 	type fields struct {
 		userTransactions       map[UniqueTransactionKey]bool

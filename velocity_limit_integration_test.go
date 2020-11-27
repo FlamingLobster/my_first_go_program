@@ -7,11 +7,8 @@ import (
 	"time"
 )
 
-/**
-This came before I understood the typical go style table tests. This can be turned into table tests
-*/
 func TestRepeatedId(t *testing.T) {
-	Reset() //seems that tests are sharing state for some reason. I'm not too familiar with Go testing so this is a dirty hack
+	Reset()
 
 	loadFund := velocity.Funds{
 		Id:         33,

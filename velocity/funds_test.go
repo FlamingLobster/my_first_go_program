@@ -5,10 +5,6 @@ import (
 	"testing"
 )
 
-/**
-There are too many tests due to the implementation having too many edge cases. Ideally this should be turned
-into a smart fuzz test to cover unknown edge cases
-*/
 func TestDollar_MarshalJSON(t *testing.T) {
 	type fields struct {
 		Amount int
@@ -18,10 +14,7 @@ func TestDollar_MarshalJSON(t *testing.T) {
 		fields  fields
 		want    []byte
 		wantErr bool
-	}{
-		//{name: "testMarshal"},
-		//{name: "testUnmarshal"},
-	}
+	}{}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			d := Dollar{
