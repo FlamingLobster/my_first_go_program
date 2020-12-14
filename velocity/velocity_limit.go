@@ -51,6 +51,8 @@ func (l *Limits) allowedByDailyLimit(funds Funds) bool {
 
 	startOfDay := ToStartOfDay(funds.Timestamp)
 	if balanceAndCount, present := l.userDailyTransactions[DailyKey(funds.CustomerId, startOfDay)]; present {
+		//This assumes that only an accepted load fund event is counted among the 3 allowed per day. Failed ones do not
+		//increase the count. This is ambiguous in the requirements but the output matches the expected output.txt file
 		if balanceAndCount.balance+funds.Dollar.Amount > DailyFundLimit ||
 			balanceAndCount.count == DailyDistinctLimit {
 			return false

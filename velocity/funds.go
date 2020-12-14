@@ -14,6 +14,7 @@ type Funds struct {
 	Timestamp  time.Time `json:"time"`
 }
 
+//should really use a well characterized money handling library
 type Dollar struct {
 	Amount int
 }
